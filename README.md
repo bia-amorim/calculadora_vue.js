@@ -1,4 +1,4 @@
-# Atividade de Calculadora com Vue.js 
+# Atividade - Calculadora com Vue.js 
 
 __Curso Analise e Desenvolvimento de Sistemas__  
 __Disciplina:__ Design da Informação e Interface Homem Computador   
