@@ -4,21 +4,20 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Calculadora com Vue.js</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.5.3/dist/css/bootstrap.min.css"
         integrity="sha384-TX8t27EcRE3e/ihU7zmQxVncDAy5uIKz4rEkgIXeMed4M0jlfIDPvg6uqKI2xXr2" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.12/dist/vue.js"></script>
-    
 </head>
 
 <body>
     <div class="container" id="app">
         <div class="row justify-content-md-center">
             <div class="col-lg-5">
+                
                 <div class="col-lg-12">
                     <nav class="navbar navbar-dark bg-info">
                         <a href="#" class="navbar-brand" >{{titulo}}</a>
-                        <div class="navbar-text">{{nome}}</div>
                     </nav>
                 </div>
             </div>
@@ -29,9 +28,17 @@
 
                 <div class="col-lg-12">
 
+                    <div class="row">
+                        <div class="col-lg-12">
+
+                            <textarea v-if="historico.length > 0" class="form-control text-right overflow-auto" style="resize: none;" rows="5" readonly>{{mostraHistorico()}}</textarea>
+                            <textarea class="form-control" style="resize: none;" rows="5" v-else readonly></textarea>
+                
+                        </div>
+                    </div>
                     <div class="row form-group">
                         <div class="col-lg-12">
-                            <input type="text" class="form-control border-0" name="visor" id="visor"  v-bind:placeholder="visor"
+                            <input type="text" class="form-control border-top-0" name="visor" id="visor"  v-bind:placeholder="visor"
                                v-bind:value="operacao" style="text-align: right;"  readonly />
                         </div>
                     </div>
@@ -113,8 +120,6 @@
         </form>
 
     </div>
-
-
 </body>
  
 <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"
@@ -131,30 +136,53 @@
     el: '#app',
     data: {
         titulo: 'Calculadora',
-        nome: 'Rafael da Silva Menezes',
         visor: 0,
-        operacao: ''
+        operacao: '',
+        historico: []
     },
     methods: {
-        add: function (valor) {
-            app.operacao += valor;
-        },
-        calcular: function () {
-            var operadores = ['+', '-', '÷', 'x'];
-            var selecionado = 0;
 
-            for (i = 0; i <= operadores.length; i++) {
-                if (app.operacao.indexOf(operadores[i]) != -1) {
-                    selecionado = operadores[i];
+        //Adicionar caracteres input operação
+        add: function (valor) {
+
+            if(this.operacao == ''){
+                switch(valor){
+                    case '+', '-', '÷', 'x':
+                    this.operacao += this.visor + valor
+                    break;
+                    case '.':
+                    break;
+                    default:
+                    this.operacao += valor;
                     break;
                 }
+            }else{ 
+                this.operacao += valor;
             }
-
-            n1 = parseFloat(app.operacao.substring(0, app.operacao.indexOf(selecionado)))
-            n2 = parseFloat(app.operacao.substring(app.operacao.indexOf(selecionado) + 1))
-
-            var valor = 0
             
+        },
+
+        //Realiza calculo de acordo com operação
+        calcular: function () {
+            var operadores = ['+', '-', '÷', 'x']; // array com possíveis operadores
+            var selecionado = ''; // variável para receber o operador na string 
+            
+            
+            for (i = 0; i <= operadores.length; i++) { // for que corre todas as posições da string operação
+                if (this.operacao.indexOf(operadores[i]) != -1) { // verifica se há operador na posição  
+                    selecionado = operadores[i]; // variavel selecionado recebe a posição que operador estar na String
+                    break; // finaliza o for após encontrar o operador
+                }
+            }
+            // n1 recebe o conteúdo do ponto inicial da String até operador e transforma em tipo Float para realizar o cálculo            
+            n1 = parseFloat(this.operacao.substring(0, this.operacao.indexOf(selecionado)))
+            // n2 recebe o conteúdo do operador até o final da String transformada em Float 
+            n2 = parseFloat(this.operacao.substring(this.operacao.indexOf(selecionado) + 1))
+
+
+            var valor = 0 // variável que receberá o resultado
+            
+            // Cálculo realizado de acordo com o operador
             switch (selecionado) {
                 case '+':
                     valor = n1 + n2
@@ -172,24 +200,41 @@
                 default:
                     break;
             }
-            app.operacao = '';
-            app.visor = valor.toString();
+            //Adiciona a String dentro do array Histórico 
+            this.historico.push(this.operacao +' = ' +valor.toString())
+
+            //limpa o campo operação
+            this.operacao = ''
+
+            //Somado o valor contido no visor com o resultado da operação e transforma em String novamente 
+            this.visor = (parseFloat(this.visor) + valor).toString()
 
         },
-        
+        // função que limpa o ultimo carácter da string operação
         limpa: function(){
             
             var strCorrigida = app.operacao.substr(0, app.operacao.length - 1);
 
-            app.operacao = strCorrigida;
+            this.operacao = strCorrigida;
         },
 
+        // função que reseta todas as variáveis 
         limpaTudo: function(){
-            app.visor = 0
-            app.operacao = ''
+            this.visor = 0
+            this.operacao = ''
+            this.historico = []
+
+        },
+        //Função que retorna todas as operações contidas no Array histórico
+        mostraHistorico: function(){
+            var texto = ''
+            if(this.historico.length > 0){ 
+            for(var i = 0; i < this.historico.length; i++){
+                texto += this.historico[i] + '\n'
+            }
+            }
+            return texto;
         }
-
-
     }
 });
 
